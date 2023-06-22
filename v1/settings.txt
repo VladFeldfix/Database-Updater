@@ -1,2 +1,4 @@
 Programs Location > Y:\Rafael\Cables\Cable Test\Programs
 Braids Location > Y:\Rafael\Cables\Cable Test\Braids
+TMS Inventory > Y:\Rafael\Cables\Cable Marking\TMS\Inventory.csv
+TMS Database > Y:\Rafael\Cables\Cable Marking\TMS\Database.csv
