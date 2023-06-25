@@ -8,6 +8,7 @@ class main:
         self.sc = SmartConsole("Database Updater", "1.0")
 
         # get settings
+        self.path_database = self.sc.get_setting("Database Location")
         self.path_programs = self.sc.get_setting("Programs Location")
         self.path_braids = self.sc.get_setting("Braids Location")
         self.path_tms_inv = self.sc.get_setting("TMS Inventory")
@@ -30,9 +31,9 @@ class main:
         # Missing connectors - What meeting connectors are missing for what products
 
         # GATHER DATA
-        Programs = [("PART NUMBER", "MPT PROGRAM")]
-        Braids = [("TEST CABLE", "BRAID", "CUSTOMER PART NUMBER", "FLEX PART NUMBER", "SIZE", "TYPE")]
-        TMSInventory = [("TMS PART NUMBER", "SIZE", "COLOR", "QTY")]
+        Programs = []
+        Braids = []
+        TMSInventory = []
         MissingConnectors = []
 
         # GATHER DATA on Programs
@@ -64,8 +65,10 @@ class main:
                                 data = self.sc.load_csv(root+"/testcables_to_product.csv")
                                 for line in data[1:]:
                                     if len(line) == 3:
-                                        MissingConnectors.append((PartNumber, line[1], line[2]))
-                                        Missing_plugs = True
+                                        # GATHER DATA on Missing connectors
+                                        if line[2] != "":
+                                            MissingConnectors.append((PartNumber, line[1], line[2]))
+                                            Missing_plugs = True
                     if csv_file and txt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     Programs.append((PartNumber, Status))
@@ -114,7 +117,6 @@ class main:
                             Size = data[3]
                             Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type))
         Braids = sorted(Braids[1:])
-        Braids = [("TEST CABLE", "BRAID", "CUSTOMER PART NUMBER", "FLEX PART NUMBER", "SIZE", "TYPE")] + Braids
 
         # GATHER DATA on TMS Inventory
         data = self.sc.load_csv(self.path_tms_inv)
@@ -141,11 +143,127 @@ class main:
             if not PartNumber in tms and PartNumber != "PART NUMBER":
                 TMSInventory.append((PartNumber, values[0], values[1], 0))
 
-        # GATHER DATA on Missing connectors
-
         # CREATE EXCEL TABLES
+        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test1.csv", Programs)
+        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test2.csv", Braids)
+        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test3.csv", TMSInventory)
+        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test4.csv", MissingConnectors)
+
+        # setup workbook
+        workbook = xlsxwriter.Workbook(self.path_database)
+
+        # set up color themes
+        format_black = workbook.add_format({'border': 1, 'bold': True, 'bg_color': 'black', 'font_color':'white'})
+        format_white = workbook.add_format({'border': 1})
+        format_grey = workbook.add_format({'border': 1, 'bg_color': '#c4c4c4'})
+        format_green = workbook.add_format({'border': 1, 'bg_color': '#76de68'})
+        format_red = workbook.add_format({'border': 1, 'bg_color': '#db5858'})
+        format_yellow = workbook.add_format({'border': 1, 'bg_color': '#f5f258'})
+        
+        # setup sheets
+        # Programs
+        sheet_Programs = workbook.add_worksheet("Programs")
+        sheet_Programs.freeze_panes(1,0)
+        sheet_Programs.autofilter("A1:B1")
+        sheet_Programs.set_column('A:A', 30)
+        sheet_Programs.set_column('B:B', 20)
+        sheet_Programs.write_string("A1", "PART NUMBER", format_black)
+        sheet_Programs.write_string("B1", "MPT PROGRAM", format_black)
+        
+        # Braids
+        sheet_Braids = workbook.add_worksheet("Braids")
+        sheet_Braids.freeze_panes(1,0)
+        sheet_Braids.autofilter("A1:F1")
+        sheet_Braids.set_column('A:A', 15)
+        sheet_Braids.set_column('B:B', 10)
+        sheet_Braids.set_column('C:C', 40)
+        sheet_Braids.set_column('D:D', 40)
+        sheet_Braids.set_column('E:E', 10)
+        sheet_Braids.set_column('F:F', 10)
+        sheet_Braids.write_string("A1", "TEST CABLE", format_black)	
+        sheet_Braids.write_string("B1", "BRAID", format_black)
+        sheet_Braids.write_string("C1", "CUSTOMER PART NUMBER", format_black)
+        sheet_Braids.write_string("D1", "FLEX PART NUMBER", format_black)
+        sheet_Braids.write_string("E1", "SIZE", format_black)
+        sheet_Braids.write_string("F1", "TYPE", format_black)
+
+        # TMSInventory
+        sheet_TMSInventory = workbook.add_worksheet("TMSInventory")
+        sheet_TMSInventory.freeze_panes(1,0)
+        sheet_TMSInventory.autofilter("A1:D1")
+        sheet_TMSInventory.set_column('A:A', 20)
+        sheet_TMSInventory.set_column('B:B', 10)
+        sheet_TMSInventory.set_column('C:C', 10)
+        sheet_TMSInventory.set_column('D:D', 10)
+        sheet_TMSInventory.write_string("A1", "TMS PART NUMBER", format_black)
+        sheet_TMSInventory.write_string("B1", "SIZE", format_black)
+        sheet_TMSInventory.write_string("C1", "COLOR", format_black)
+        sheet_TMSInventory.write_string("D1", "QTY", format_black)
+
+        # MissingConnectors
+        sheet_MissingConnectors = workbook.add_worksheet("MissingConnectors")
+        sheet_MissingConnectors.freeze_panes(1,0)
+        sheet_MissingConnectors.set_column('A:A', 30)
+        sheet_MissingConnectors.set_column('B:B', 20)
+        sheet_MissingConnectors.set_column('C:C', 40)
+        sheet_MissingConnectors.write_string("A1", "PART NUMBER", format_black)
+        sheet_MissingConnectors.write_string("B1", "PLUG NAME", format_black)
+        sheet_MissingConnectors.write_string("C1", "PLUG PART NUMBER", format_black)
+
+        # insert data
+        # Programs
+        i = 1
+        for line in Programs:
+            i += 1
+            sheet_Programs.write_string("A"+str(i), line[0], format_white)
+            if line[1] == "In Progress":
+                sheet_Programs.write_string("B"+str(i), line[1], format_red)
+            else:
+                sheet_Programs.write_string("B"+str(i), line[1], format_green)
+
+        # Braids
+        i = 1
+        CurrentBraid = ""
+        Color = format_white
+        for line in Braids:
+            i += 1
+            if line[0] != CurrentBraid:
+                CurrentBraid = line[0]
+                if Color == format_white:
+                    Color = format_grey
+                else:
+                    Color = format_white
+            sheet_Braids.write_string("A"+str(i), str(line[0]), Color)
+            sheet_Braids.write_string("B"+str(i), line[1], Color)
+            sheet_Braids.write_string("C"+str(i), line[2], Color)
+            sheet_Braids.write_string("D"+str(i), line[3], Color)
+            sheet_Braids.write_string("E"+str(i), str(line[4]), Color)
+            sheet_Braids.write_string("F"+str(i), line[5], Color)
+        
+        # TMSInventory
+        i = 1
+        for line in TMSInventory:
+            i += 1
+            sheet_TMSInventory.write_string("A"+str(i), line[0], format_white)
+            sheet_TMSInventory.write_string("B"+str(i), line[1], format_white)
+            sheet_TMSInventory.write_string("C"+str(i), line[2], format_white)
+            if line[3] == 0:
+                sheet_TMSInventory.write_string("D"+str(i), str(line[3]), format_red)
+            if line[3] == 1:
+                sheet_TMSInventory.write_string("D"+str(i), str(line[3]), format_yellow)
+            if line[3] > 1:
+                sheet_TMSInventory.write_string("D"+str(i), str(line[3]), format_green)
+
+        # MissingConnectors
+        i = 1
+        for line in MissingConnectors:
+            i += 1
+            sheet_MissingConnectors.write_string("A"+str(i), line[0], format_white)
+            sheet_MissingConnectors.write_string("B"+str(i), line[1], format_white)
+            sheet_MissingConnectors.write_string("C"+str(i), line[2], format_white)
 
         # END
+        workbook.close()
         self.sc.print("Done!")
         self.sc.exit()
 
