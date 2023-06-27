@@ -24,6 +24,7 @@ class main:
         self.run()
     
     def run(self):
+        self.sc.print("Processing...")
         # SPREADSHEET DESCRIPTION
         # Programs - this spreadsheet shows wheather the program is ready or not, and if not, then what is it missing
         # Braids - information about exsiting braids maps
@@ -98,6 +99,13 @@ class main:
                             CurrentBraid = line[1]
                             Pin = line[2]
                             Braid = line[3]
+                            try:
+                                if Braid != "":
+                                    Braid = int(Braid)
+                                if CurrentBraid != "":
+                                    CurrentBraid = int(CurrentBraid)
+                            except:
+                                self.sc.fatal_error("Check map for test cable #"+str(TestCable))
                             CustomerPN = line[4]
                             FlexPN = line[5]
                             Type = line[6]
@@ -234,7 +242,7 @@ class main:
                 else:
                     Color = format_white
             sheet_Braids.write_string("A"+str(i), str(line[0]), Color)
-            sheet_Braids.write_string("B"+str(i), line[1], Color)
+            sheet_Braids.write_string("B"+str(i), str(line[1]), Color)
             sheet_Braids.write_string("C"+str(i), line[2], Color)
             sheet_Braids.write_string("D"+str(i), line[3], Color)
             sheet_Braids.write_string("E"+str(i), str(line[4]), Color)
