@@ -94,6 +94,7 @@ class main:
                         LegalTestCable = False
                     PreviousPin = ""
                     if LegalTestCable:
+                        PreviousBraid = ""
                         for line in data[1:]:
                             GlobalPoint = line[0]
                             CurrentBraid = line[1]
@@ -114,9 +115,15 @@ class main:
                             if CurrentBraid != "":
                                 if CurrentBraid in info:
                                     if len(info[CurrentBraid]) == 4:
-                                        if Pin != PreviousPin and Pin.upper() != "BODY":
-                                            info[CurrentBraid][3] += 1
-                                            PreviousPin = Pin
+                                        if Pin.upper() != "BODY":
+                                            if Pin != PreviousPin:
+                                                info[CurrentBraid][3] += 1
+                                                PreviousPin = Pin
+                                            else:
+                                                if CurrentBraid != PreviousBraid:
+                                                    info[CurrentBraid][3] += 1
+                                                    PreviousPin = Pin
+                            PreviousBraid = CurrentBraid
                         for Braid, data in info.items():
                             # "TEST CABLE", "BRAID", "CUSTOMER PART NUMBER", "FLEX PART NUMBER", "SIZE", "TYPE"
                             CustomerPN = data[0]
@@ -124,8 +131,8 @@ class main:
                             Type = data[2]
                             Size = data[3]
                             Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type))
-        Braids = sorted(Braids[1:])
-
+        Braids = sorted(Braids)
+        
         # GATHER DATA on TMS Inventory
         data = self.sc.load_csv(self.path_tms_inv)
         parm = self.sc.load_csv(self.path_tms_db)
