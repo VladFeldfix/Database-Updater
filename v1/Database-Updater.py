@@ -67,9 +67,8 @@ class main:
                                 for line in data[1:]:
                                     if len(line) == 3:
                                         # GATHER DATA on Missing connectors
-                                        if line[2] != "":
-                                            MissingConnectors.append((PartNumber, line[1], line[2]))
-                                            Missing_plugs = True
+                                        MissingConnectors.append((PartNumber, line[1], line[2], line[0]))
+                                        Missing_plugs = True
                     if csv_file and txt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     Programs.append((PartNumber, Status))
@@ -159,10 +158,6 @@ class main:
                 TMSInventory.append((PartNumber, values[0], values[1], 0))
 
         # CREATE EXCEL TABLES
-        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test1.csv", Programs)
-        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test2.csv", Braids)
-        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test3.csv", TMSInventory)
-        # self.sc.save_csv("C:/Users/mig_rprod/Desktop/New folder/test4.csv", MissingConnectors)
 
         # setup workbook
         workbook = xlsxwriter.Workbook(self.path_database)
@@ -203,7 +198,7 @@ class main:
         sheet_Braids.write_string("F1", "TYPE", format_black)
 
         # TMSInventory
-        sheet_TMSInventory = workbook.add_worksheet("TMSInventory")
+        sheet_TMSInventory = workbook.add_worksheet("TMS-Inventory")
         sheet_TMSInventory.freeze_panes(1,0)
         sheet_TMSInventory.autofilter("A1:D1")
         sheet_TMSInventory.set_column('A:A', 20)
@@ -216,14 +211,17 @@ class main:
         sheet_TMSInventory.write_string("D1", "QTY", format_black)
 
         # MissingConnectors
-        sheet_MissingConnectors = workbook.add_worksheet("MissingConnectors")
+        sheet_MissingConnectors = workbook.add_worksheet("Connectors")
         sheet_MissingConnectors.freeze_panes(1,0)
+        sheet_MissingConnectors.autofilter("A1:D1")
         sheet_MissingConnectors.set_column('A:A', 30)
         sheet_MissingConnectors.set_column('B:B', 20)
         sheet_MissingConnectors.set_column('C:C', 40)
+        sheet_MissingConnectors.set_column('D:D', 30)
         sheet_MissingConnectors.write_string("A1", "PART NUMBER", format_black)
         sheet_MissingConnectors.write_string("B1", "PLUG NAME", format_black)
         sheet_MissingConnectors.write_string("C1", "PLUG PART NUMBER", format_black)
+        sheet_MissingConnectors.write_string("D1", "CONNECT TO TEST CABLE", format_black)
 
         # insert data
         # Programs
@@ -276,6 +274,7 @@ class main:
             sheet_MissingConnectors.write_string("A"+str(i), line[0], format_white)
             sheet_MissingConnectors.write_string("B"+str(i), line[1], format_white)
             sheet_MissingConnectors.write_string("C"+str(i), line[2], format_white)
+            sheet_MissingConnectors.write_string("D"+str(i), line[3], format_white)
 
         # END
         workbook.close()
