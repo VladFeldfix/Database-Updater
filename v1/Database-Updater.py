@@ -68,7 +68,8 @@ class main:
                                     if len(line) == 3:
                                         # GATHER DATA on Missing connectors
                                         MissingConnectors.append((PartNumber, line[1], line[2], line[0]))
-                                        Missing_plugs = True
+                                        if line[0] == "":
+                                            Missing_plugs = True
                     if csv_file and txt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     Programs.append((PartNumber, Status))
