@@ -203,7 +203,7 @@ class main:
         sheet_TMSInventory.freeze_panes(1,0)
         sheet_TMSInventory.autofilter("A1:D1")
         sheet_TMSInventory.set_column('A:A', 20)
-        sheet_TMSInventory.set_column('B:B', 10)
+        sheet_TMSInventory.set_column('B:B', 20)
         sheet_TMSInventory.set_column('C:C', 10)
         sheet_TMSInventory.set_column('D:D', 10)
         sheet_TMSInventory.write_string("A1", "TMS PART NUMBER", format_black)
@@ -219,9 +219,9 @@ class main:
         sheet_MissingConnectors.set_column('B:B', 20)
         sheet_MissingConnectors.set_column('C:C', 40)
         sheet_MissingConnectors.set_column('D:D', 30)
-        sheet_MissingConnectors.write_string("A1", "PART NUMBER", format_black)
+        sheet_MissingConnectors.write_string("A1", "ASSEMBLY PART NUMBER", format_black)
         sheet_MissingConnectors.write_string("B1", "PLUG NAME", format_black)
-        sheet_MissingConnectors.write_string("C1", "PLUG PART NUMBER", format_black)
+        sheet_MissingConnectors.write_string("C1", "ASSEMBLY PLUG PART NUMBER", format_black)
         sheet_MissingConnectors.write_string("D1", "CONNECT TO TEST CABLE", format_black)
 
         # insert data
