@@ -5,7 +5,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.0")
+        self.sc = SmartConsole("Database Updater", "1.1")
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -132,6 +132,11 @@ class main:
                             Size = data[3]
                             Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type))
         Braids = sorted(Braids)
+
+        # READ JIGS DATA
+        path = self.path_braids+"/JIGS.csv"
+        self.sc.test_path(path)
+        Jigs = self.sc.load_csv(path)
         
         # GATHER DATA on TMS Inventory
         data = self.sc.load_csv(self.path_tms_inv)
@@ -198,6 +203,15 @@ class main:
         sheet_Braids.write_string("E1", "SIZE", format_black)
         sheet_Braids.write_string("F1", "TYPE", format_black)
 
+        # Jigs
+        sheet_Jigs = workbook.add_worksheet("Jigs")
+        sheet_Jigs.freeze_panes(1,0)
+        sheet_Jigs.autofilter("A1:B1")
+        sheet_Jigs.set_column('A:A', 15)
+        sheet_Jigs.set_column('B:B', 15)
+        sheet_Jigs.write_string("A1", "JIG", format_black)
+        sheet_Jigs.write_string("B1", "TEST CABLE", format_black)
+
         # TMSInventory
         sheet_TMSInventory = workbook.add_worksheet("TMS-Inventory")
         sheet_TMSInventory.freeze_panes(1,0)
@@ -254,6 +268,20 @@ class main:
             sheet_Braids.write_string("E"+str(i), str(line[4]), Color)
             sheet_Braids.write_string("F"+str(i), line[5], Color)
         
+        # Jigs
+        i = 1
+        CurrentJig = ""
+        for line in Jigs:
+            i += 1
+            if line[0] != CurrentJig:
+                CurrentJig = line[0]
+                if Color == format_white:
+                    Color = format_grey
+                else:
+                    Color = format_white
+            sheet_Jigs.write_string("A"+str(i), line[0], Color)
+            sheet_Jigs.write_string("B"+str(i), line[1], Color)
+
         # TMSInventory
         i = 1
         for line in TMSInventory:
