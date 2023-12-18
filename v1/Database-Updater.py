@@ -298,12 +298,26 @@ class main:
 
         # MissingConnectors
         i = 1
+        CurrentProgram = ""
+        Color = format_grey
         for line in MissingConnectors:
             i += 1
-            sheet_MissingConnectors.write_string("A"+str(i), line[0], format_white)
-            sheet_MissingConnectors.write_string("B"+str(i), line[1], format_white)
-            sheet_MissingConnectors.write_string("C"+str(i), line[2], format_white)
-            sheet_MissingConnectors.write_string("D"+str(i), line[3], format_white)
+            if CurrentProgram != line[0]:
+                CurrentProgram = line[0]
+                if Color == format_grey:
+                    Color = format_white
+                else:
+                    Color = format_grey
+            if line[3] == "":
+                Color2 = format_red
+                line3 = "Missing"
+            else:
+                Color2 = Color
+                line3 = line[3]
+            sheet_MissingConnectors.write_string("A"+str(i), line[0], Color)
+            sheet_MissingConnectors.write_string("B"+str(i), line[1], Color)
+            sheet_MissingConnectors.write_string("C"+str(i), line[2], Color)
+            sheet_MissingConnectors.write_string("D"+str(i), line3, Color2)
 
         # END
         workbook.close()
