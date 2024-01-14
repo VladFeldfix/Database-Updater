@@ -5,7 +5,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.1")
+        self.sc = SmartConsole("Database Updater", "1.4")
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -13,12 +13,14 @@ class main:
         self.path_braids = self.sc.get_setting("Braids Location")
         self.path_tms_inv = self.sc.get_setting("TMS Inventory")
         self.path_tms_db = self.sc.get_setting("TMS Database")
+        self.path_test_logs = self.sc.get_setting("Test logs")
 
         # test all paths
         self.sc.test_path(self.path_programs)
         self.sc.test_path(self.path_braids)
         self.sc.test_path(self.path_tms_inv)
         self.sc.test_path(self.path_tms_db)
+        self.sc.test_path(self.path_test_logs)
 
         # display main menu
         self.run()
@@ -81,6 +83,7 @@ class main:
         FlexPN = ""
         Size = 0
         Type = ""
+        EmptySpaces = {}
         for root, dirs, files in os.walk(self.path_braids):
             for file in files:
                 info = {}
@@ -124,6 +127,10 @@ class main:
                                                     info[CurrentBraid][3] += 1
                                                     PreviousPin = Pin
                             PreviousBraid = CurrentBraid
+                            if not TestCable in EmptySpaces:
+                                EmptySpaces[TestCable] = 0
+                            if GlobalPoint != "" and CurrentBraid == "":
+                                EmptySpaces[TestCable] += 1
                         for Braid, data in info.items():
                             # "TEST CABLE", "BRAID", "CUSTOMER PART NUMBER", "FLEX PART NUMBER", "SIZE", "TYPE"
                             CustomerPN = data[0]
@@ -132,6 +139,10 @@ class main:
                             Size = data[3]
                             Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type))
         Braids = sorted(Braids)
+        EmptySpacesSortedList = []
+        for key, val in EmptySpaces.items():
+            EmptySpacesSortedList.append((key, val))
+        EmptySpacesSortedList = sorted(EmptySpacesSortedList)
 
         # READ JIGS DATA
         path = self.path_braids+"/JIGS.csv"
@@ -163,6 +174,14 @@ class main:
             if not PartNumber in tms and PartNumber != "PART NUMBER":
                 TMSInventory.append((PartNumber, values[0], values[1], 0))
 
+        # GATHER DATA ON TEST LOGS
+        TestLogs = []
+        for root, directories, files in os.walk(self.path_test_logs):
+            for file in files:
+                file = file.split("_")
+                part_number = ""
+                if len(file) == 3:
+                    TestLogs.append((file[0],file[1],file[2].replace(".html", "")))
         # CREATE EXCEL TABLES
 
         # setup workbook
@@ -203,6 +222,15 @@ class main:
         sheet_Braids.write_string("E1", "SIZE", format_black)
         sheet_Braids.write_string("F1", "TYPE", format_black)
 
+        # Empty Spaces
+        sheet_BraidsEmptySpaces = workbook.add_worksheet("Empty Spaces")
+        sheet_BraidsEmptySpaces.freeze_panes(1,0)
+        sheet_BraidsEmptySpaces.autofilter("A1:B1")
+        sheet_BraidsEmptySpaces.set_column('A:A', 15)
+        sheet_BraidsEmptySpaces.set_column('B:B', 15)
+        sheet_BraidsEmptySpaces.write_string("A1", "TEST CABLE", format_black)	
+        sheet_BraidsEmptySpaces.write_string("B1", "EMPTY SPACES", format_black)
+
         # Jigs
         sheet_Jigs = workbook.add_worksheet("Jigs")
         sheet_Jigs.freeze_panes(1,0)
@@ -238,6 +266,17 @@ class main:
         sheet_MissingConnectors.write_string("C1", "ASSEMBLY PLUG PART NUMBER", format_black)
         sheet_MissingConnectors.write_string("D1", "CONNECT TO TEST CABLE", format_black)
 
+        # Test logs
+        sheet_TestLogs = workbook.add_worksheet("Test Logs")
+        sheet_TestLogs.freeze_panes(1,0)
+        sheet_TestLogs.autofilter("A1:C1")
+        sheet_TestLogs.set_column('A:A', 30)
+        sheet_TestLogs.set_column('B:B', 30)
+        sheet_TestLogs.set_column('C:C', 30)
+        sheet_TestLogs.write_string("A1", "PART NUMBER", format_black)
+        sheet_TestLogs.write_string("B1", "SERIAL NUMBER", format_black)
+        sheet_TestLogs.write_string("C1", "DATE", format_black)
+
         # insert data
         # Programs
         i = 1
@@ -268,6 +307,13 @@ class main:
             sheet_Braids.write_string("E"+str(i), str(line[4]), Color)
             sheet_Braids.write_string("F"+str(i), line[5], Color)
         
+        # Empty Spaces
+        i = 1
+        for line in EmptySpacesSortedList:
+            i += 1
+            sheet_BraidsEmptySpaces.write_string("A"+str(i), str(line[0]), format_white)
+            sheet_BraidsEmptySpaces.write_string("B"+str(i), str(line[1]), format_white)
+
         # Jigs
         i = 1
         CurrentJig = ""
@@ -319,6 +365,22 @@ class main:
             sheet_MissingConnectors.write_string("C"+str(i), line[2], Color)
             sheet_MissingConnectors.write_string("D"+str(i), line3, Color2)
 
+        # Test Logs
+        i = 1
+        Color = format_grey
+        CurrentProgram = ""
+        for line in TestLogs:
+            if CurrentProgram != line[2]:
+                CurrentProgram = line[2]
+                if Color == format_grey:
+                    Color = format_white
+                else:
+                    Color = format_grey
+            i += 1
+            sheet_TestLogs.write_string("A"+str(i), line[2], Color)
+            sheet_TestLogs.write_string("B"+str(i), line[0], Color)
+            sheet_TestLogs.write_string("C"+str(i), line[1], Color)
+        
         # END
         workbook.close()
         self.sc.print("Done!")
