@@ -6,7 +6,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.4")
+        self.sc = SmartConsole("Database Updater", "1.5")
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -93,7 +93,8 @@ class main:
                     TestCable = file.replace(".csv", "")
                     LegalTestCable = True
                     try:
-                        TestCable = int(TestCable)
+                        tmp = TestCable[3:]
+                        tmp = int(tmp)
                     except:
                         LegalTestCable = False
                     PreviousPin = ""
@@ -381,6 +382,82 @@ class main:
             sheet_TestLogs.write_string("A"+str(i), line[2], Color)
             sheet_TestLogs.write_string("B"+str(i), line[0], Color)
             sheet_TestLogs.write_string("C"+str(i), line[1], Color)
+        
+        # TRANSFER BRAIDS FROM CSV TO LUA
+        # this function saves a copy of all connector maps in csv map mode as a lua map
+        for root, dirs, files in os.walk(self.path_braids):
+            for file in files:
+                if ".csv" in file:
+                    try:
+                        name = file.replace(".csv","")
+                        tmp = name[3:]
+                        tmp = int(tmp)
+                        error = False
+                    except:
+                        error = True
+
+                    if not error:
+                        path = self.path_braids+"/LUA"
+                        newluafilename = path+"/"+file.replace(".csv", ".lua")
+                        if not os.path.isdir(path):
+                            os.makedirs(path)
+
+                        # generate lua version
+                        if not os.path.isfile(newluafilename):
+                            # read csv file
+                            csv = open(self.path_braids+"/"+file,"r")
+                            lines = csv.readlines()
+                            csv.close()
+                            plugs = {} # plug_index: plug_pins
+                            last_pin_name = ""
+                            for line in lines[1:]:
+                                #GLOBAL POINT,   PLUG,   PIN,   PLUG NUMBER,   PART NUMBER,   RAFAEL PART NUMBER,   PIN TYPE
+                                line = line.replace("\n","")
+                                line = line.split(",")
+                                GLOBAL_POINT = line[0]
+                                PLUG = line[1]
+                                PIN = line[2]
+                                Kelvin = PIN == last_pin_name
+                                last_pin_name = PIN
+                                if PLUG != "":
+                                    if not PLUG in plugs:
+                                        plugs[PLUG] = []
+                                    plugs[PLUG].append((GLOBAL_POINT, PIN, Kelvin))
+
+                            # prepare lua code
+                            lua = []
+                            lua.append("{\n")
+                            lua.append("  version = 1,\n")
+                            lua.append("  name = [["+name+"]],\n")
+                            lua.append("  connector_list=\n")
+                            lua.append("  {\n")
+                            for plug_index, plug_pins in plugs.items():
+                                lua.append("    {\n")
+                                lua.append("      name = [["+name+"_"+plug_index+"]],\n")
+                                lua.append("      pins = \n")
+                                lua.append("      {\n")
+                                for pin in plug_pins:
+                                    global_point = pin[0]
+                                    local_name = pin[1]
+                                    Kelvin = pin[2]
+                                    if not Kelvin:
+                                        lua.append("        {"+global_point+",name=[["+local_name+"]]},\n")    
+                                    else:
+                                        lastline = lua.pop()
+                                        lua.append(lastline.replace("]]},\n", "]],kelvin="+global_point+"},\n"))
+                                lua.append("      }\n")
+                                lua.append("    },\n")
+                            lua.append("  },\n")
+                            lua.append("}\n")
+                            
+                            # save to lua file
+                            luafile = open(newluafilename,"w")
+                            for line in lua:
+                                luafile.write(line)
+                            luafile.close()
+
+        # TRANSFER BRAIDS FROM LUA TO CSV
+        # this function saves a copy of all connector maps in lua map mode as a csv map
         
         # END
         workbook.close()
