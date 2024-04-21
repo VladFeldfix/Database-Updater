@@ -461,7 +461,7 @@ class main:
         
         # END
         workbook.close()
-        self.sc.print("Done!")
+        self.sc.good("Done!")
         self.sc.exit()
 
 main()
