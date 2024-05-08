@@ -56,6 +56,7 @@ class main:
                     csv_file = False
                     txt_file = False
                     html_file = False
+                    mpt_file = False
                     Missing_plugs = False
                     for file in files:
                         if file == PartNumber+".csv":
@@ -64,6 +65,8 @@ class main:
                             txt_file = True
                         if file == PartNumber+".html":
                             html_file = True
+                        if file == PartNumber+".mpt_product":
+                            mpt_file = True
                         if file == "testcables_to_product.csv":
                             if os.path.isfile(root+"/testcables_to_product.csv"):
                                 data = self.sc.load_csv(root+"/testcables_to_product.csv")
@@ -74,6 +77,8 @@ class main:
                                         if line[0] == "":
                                             Missing_plugs = True
                     if csv_file and txt_file and html_file and not Missing_plugs:
+                        Status = "Complete"
+                    if mpt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     Programs.append((PartNumber, Status))
 
