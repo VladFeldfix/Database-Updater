@@ -6,7 +6,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.5")
+        self.sc = SmartConsole("Database Updater", "1.6")
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -35,12 +35,14 @@ class main:
         # Missing connectors - What meeting connectors are missing for what products
 
         # GATHER DATA
+        self.sc.print("GATHERING DATA:")
         Programs = []
         Braids = []
         TMSInventory = []
         MissingConnectors = []
 
         # GATHER DATA on Programs
+        self.sc.print("Gathering data on programs...")
         PartNumber = ""
         Status = ""
         test = self.path_programs.replace("\\", "/")
@@ -83,6 +85,7 @@ class main:
                     Programs.append((PartNumber, Status))
 
         # GATHER DATA on Braids
+        self.sc.print("Gathering data on braids...")
         TestCable = ""
         Braid = ""
         CustomerPN = ""
@@ -106,6 +109,9 @@ class main:
                     if LegalTestCable:
                         PreviousBraid = ""
                         for line in data[1:]:
+                            # 0           , 1   , 2  , 3          , 4               , 5                  , 6
+                            # GLOBAL_POINT, PLUG, PIN, PLUG_NUMBER, PART_NUMBER     , RAFAEL_PART_NUMBER , PIN_TYPE 
+                            # 1           , 1   , A  , 1          , D38999/20WH53SN , 112065102          , Socket
                             GlobalPoint = line[0]
                             CurrentBraid = line[1]
                             Pin = line[2]
@@ -152,36 +158,35 @@ class main:
         EmptySpacesSortedList = sorted(EmptySpacesSortedList)
 
         # READ JIGS DATA
+        self.sc.print("Gathering data on jigs...")
         path = self.path_braids+"/JIGS.csv"
         self.sc.test_path(path)
         Jigs = self.sc.load_csv(path)
         
         # GATHER DATA on TMS Inventory
-        data = self.sc.load_csv(self.path_tms_inv)
-        parm = self.sc.load_csv(self.path_tms_db)
-        tms = {}
-        parameters = {}
-        for line in data[1:]:
-            PartNumber = line[1]
-            if PartNumber in tms:
-                tms[PartNumber] += 1
+        self.sc.print("Gathering data on labeling inventory...")
+        inv_part_numbers = self.sc.load_csv(self.path_tms_db)[1:] # Flex Part Number	Customer Part Number	Description
+        inv_boxid = self.sc.load_csv(self.path_tms_inv)[1:]
+        qty = {}
+        for x in inv_boxid:
+            pn = x[1]
+            if not pn in qty:
+                qty[pn] = 1
             else:
-                tms[PartNumber] = 1
-        for line in parm:
-            PartNumber = line[0]
-            Size = line[1]
-            Color = line[2]
-            parameters[PartNumber] = (Size,Color)
-        for PartNumber, qty in tms.items():
-            if PartNumber in parameters:
-                Size = parameters[PartNumber][0]
-                Color = parameters[PartNumber][1]
-                TMSInventory.append((PartNumber, Size, Color, qty))
-        for PartNumber, values in parameters.items():
-            if not PartNumber in tms and PartNumber != "PART NUMBER":
-                TMSInventory.append((PartNumber, values[0], values[1], 0))
+                qty[pn] += 1
+        TMSInventory = []
+        for x in inv_part_numbers:
+            pn = x[0]
+            cpn = x[1]
+            desc = x[2]
+            if pn in qty:
+                pnqty = qty[pn]
+            else:
+                pnqty = 0
+            TMSInventory.append((pn, cpn, desc, pnqty))
 
         # GATHER DATA ON TEST LOGS
+        self.sc.print("Gathering data on test logs...")
         TestLogs = []
         for root, directories, files in os.walk(self.path_test_logs):
             for file in files:
@@ -189,7 +194,10 @@ class main:
                 part_number = ""
                 if len(file) == 3:
                     TestLogs.append((file[0],file[1],file[2].replace(".html", "")))
+        
+        
         # CREATE EXCEL TABLES
+        self.sc.print("Generating Excel table...")
 
         # setup workbook
         workbook = xlsxwriter.Workbook(self.path_database)
@@ -248,16 +256,16 @@ class main:
         sheet_Jigs.write_string("B1", "TEST CABLE", format_black)
 
         # TMSInventory
-        sheet_TMSInventory = workbook.add_worksheet("TMS-Inventory")
+        sheet_TMSInventory = workbook.add_worksheet("Labeling-Inventory")
         sheet_TMSInventory.freeze_panes(1,0)
         sheet_TMSInventory.autofilter("A1:D1")
         sheet_TMSInventory.set_column('A:A', 20)
         sheet_TMSInventory.set_column('B:B', 20)
-        sheet_TMSInventory.set_column('C:C', 10)
+        sheet_TMSInventory.set_column('C:C', 20)
         sheet_TMSInventory.set_column('D:D', 10)
-        sheet_TMSInventory.write_string("A1", "TMS PART NUMBER", format_black)
-        sheet_TMSInventory.write_string("B1", "SIZE", format_black)
-        sheet_TMSInventory.write_string("C1", "COLOR", format_black)
+        sheet_TMSInventory.write_string("A1", "PART NUMBER", format_black)
+        sheet_TMSInventory.write_string("B1", "CUSTOMER PN", format_black)
+        sheet_TMSInventory.write_string("C1", "DESCRIPTION", format_black)
         sheet_TMSInventory.write_string("D1", "QTY", format_black)
 
         # MissingConnectors
@@ -389,6 +397,7 @@ class main:
             sheet_TestLogs.write_string("C"+str(i), line[1], Color)
         
         # TRANSFER BRAIDS FROM CSV TO LUA
+        self.sc.print("Generating LUA files for braids...")
         # this function saves a copy of all connector maps in csv map mode as a lua map
         for root, dirs, files in os.walk(self.path_braids):
             for file in files:
@@ -415,15 +424,19 @@ class main:
                             csv.close()
                             plugs = {} # plug_index: plug_pins
                             last_pin_name = ""
+                            last_plug = ""
                             for line in lines[1:]:
-                                #GLOBAL POINT,   PLUG,   PIN,   PLUG NUMBER,   PART NUMBER,   RAFAEL PART NUMBER,   PIN TYPE
+                                # 0           , 1   , 2  , 3          , 4               , 5                  , 6
+                                # GLOBAL_POINT, PLUG, PIN, PLUG_NUMBER, PART_NUMBER     , RAFAEL_PART_NUMBER , PIN_TYPE 
+                                # 1           , 1   , A  , 1          , D38999/20WH53SN , 112065102          , Socket
                                 line = line.replace("\n","")
                                 line = line.split(",")
                                 GLOBAL_POINT = line[0]
                                 PLUG = line[1]
                                 PIN = line[2]
-                                Kelvin = PIN == last_pin_name
+                                Kelvin = PIN == last_pin_name and PLUG == last_plug
                                 last_pin_name = PIN
+                                last_plug = PLUG
                                 if PLUG != "":
                                     if not PLUG in plugs:
                                         plugs[PLUG] = []
