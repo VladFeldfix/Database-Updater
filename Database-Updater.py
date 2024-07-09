@@ -193,7 +193,7 @@ class main:
                 file = file.split("_")
                 part_number = ""
                 if len(file) == 3:
-                    TestLogs.append((file[0],file[1],file[2].replace(".html", "")))
+                    TestLogs.append((file[0],file[1],file[2].replace(".html", "").replace(".pdf", "")))
         
         
         # CREATE EXCEL TABLES
