@@ -35,7 +35,7 @@ class main:
         # Missing connectors - What meeting connectors are missing for what products
 
         # GATHER DATA
-        self.sc.print("GATHERING DATA:")
+        self.sc.print("\nGATHERING DATA:")
         Programs = []
         Braids = []
         TMSInventory = []
@@ -197,6 +197,7 @@ class main:
         
         
         # CREATE EXCEL TABLES
+        self.sc.print("\nGENERATING DATA:")
         self.sc.print("Generating Excel table...")
 
         # setup workbook
@@ -479,6 +480,7 @@ class main:
         
         # END
         workbook.close()
+        self.sc.print("")
         self.sc.good("Done!")
         self.sc.exit()
 
