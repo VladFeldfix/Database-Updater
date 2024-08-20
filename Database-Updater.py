@@ -190,10 +190,11 @@ class main:
         TestLogs = []
         for root, directories, files in os.walk(self.path_test_logs):
             for file in files:
-                file = file.split("_")
-                part_number = ""
-                if len(file) == 3:
-                    TestLogs.append((file[0],file[1],file[2].replace(".html", "").replace(".pdf", "")))
+                if "html" in file or ".pdf" in file:
+                    file = file.split("_")
+                    part_number = ""
+                    if len(file) == 3:
+                        TestLogs.append((file[0],file[1],file[2].replace(".html", "").replace(".pdf", "")))
         
         
         # CREATE EXCEL TABLES
