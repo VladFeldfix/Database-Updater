@@ -1,6 +1,6 @@
-Database Location > Y:\Rafael\Cables\Cable Test\Database.xlsx
-Programs Location > Y:\Rafael\Cables\Cable Test\Programs
-Braids Location > Y:\Rafael\Cables\Cable Test\Braids
-TMS Inventory > Y:\Rafael\Cables\Cable Marking\.Database\Inventory.csv
-TMS Database > Y:\Rafael\Cables\Cable Marking\.Database\INV Part Numbers.csv
-Test logs > Y:\Rafael\Cables\Cable Test\MPT LOT files and programs
+Database Location > C:\Users\Database.xlsx
+Programs Location > C:\Users\Programs
+Braids Location > C:\Users\Braids
+TMS Inventory > C:\Users\Inventory.csv
+TMS Database > C:\Users\INV Part Numbers.csv
+Test logs > C:\Users\MPT LOT files and programs
