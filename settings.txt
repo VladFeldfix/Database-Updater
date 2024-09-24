@@ -1,6 +1,6 @@
-Database Location > C:\Users\Database.xlsx
-Programs Location > C:\Users\Programs
-Braids Location > C:\Users\Braids
-TMS Inventory > C:\Users\Inventory.csv
-TMS Database > C:\Users\INV Part Numbers.csv
-Test logs > C:\Users\MPT LOT files and programs
+Database Location > C:\Users\me\Database.xlsx
+Programs Location > C:\Users\me\Programs
+Braids Location > C:\Users\me\Braids
+TMS Inventory > C:\Users\me\Inventory.csv
+TMS Database > C:\Users\me\INV Part Numbers.csv
+Test logs > C:\Users\me\MPT LOT files and programs
