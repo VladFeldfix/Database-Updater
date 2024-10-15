@@ -6,7 +6,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.6")
+        self.sc = SmartConsole("Database Updater", "1.7")
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -45,6 +45,7 @@ class main:
         self.sc.print("Gathering data on programs...")
         PartNumber = ""
         Status = ""
+        Status2 = ""
         test = self.path_programs.replace("\\", "/")
         test = test.split("/")
         test = len(test)
@@ -52,6 +53,7 @@ class main:
             root = root.replace("\\", "/")
             PartNumber = root.split("/")
             Status = "In Progress"
+            Status2 = "In Progress"
             if len(PartNumber) == test+1:
                 PartNumber = PartNumber[-1]
                 if not "_" in PartNumber:
@@ -67,7 +69,9 @@ class main:
                             txt_file = True
                         if file == PartNumber+".html":
                             html_file = True
-                        if file == PartNumber+".mpt_product":
+                        input(file)
+                        input(".mpt_product" in file)
+                        if ".mpt_product" in file and PartNumber in file:
                             mpt_file = True
                         if file == "testcables_to_product.csv":
                             if os.path.isfile(root+"/testcables_to_product.csv"):
@@ -81,8 +85,8 @@ class main:
                     if csv_file and txt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     if mpt_file and html_file and not Missing_plugs:
-                        Status = "Complete"
-                    Programs.append((PartNumber, Status))
+                        Status2 = "Complete"
+                    Programs.append((PartNumber, Status, Status2))
 
         # GATHER DATA on Braids
         self.sc.print("Gathering data on braids...")
@@ -216,11 +220,13 @@ class main:
         # Programs
         sheet_Programs = workbook.add_worksheet("Programs")
         sheet_Programs.freeze_panes(1,0)
-        sheet_Programs.autofilter("A1:B1")
+        sheet_Programs.autofilter("A1:C1")
         sheet_Programs.set_column('A:A', 30)
         sheet_Programs.set_column('B:B', 20)
+        sheet_Programs.set_column('C:C', 20)
         sheet_Programs.write_string("A1", "PART NUMBER", format_black)
-        sheet_Programs.write_string("B1", "MPT PROGRAM", format_black)
+        sheet_Programs.write_string("B1", "MPT-5000L", format_black)
+        sheet_Programs.write_string("C1", "MPT-5000", format_black)
         
         # Braids
         sheet_Braids = workbook.add_worksheet("Braids")
@@ -304,6 +310,11 @@ class main:
                 sheet_Programs.write_string("B"+str(i), line[1], format_red)
             else:
                 sheet_Programs.write_string("B"+str(i), line[1], format_green)
+
+            if line[2] == "In Progress":
+                sheet_Programs.write_string("C"+str(i), line[2], format_red)
+            else:
+                sheet_Programs.write_string("C"+str(i), line[2], format_green)
 
         # Braids
         i = 1
