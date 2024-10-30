@@ -6,7 +6,10 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "1.7")
+        self.sc = SmartConsole("Database Updater", "2.0")
+
+        # set-up main memu
+        self.sc.add_main_menu_item("RUN", self.run)
 
         # get settings
         self.path_database = self.sc.get_setting("Database Location")
@@ -24,7 +27,7 @@ class main:
         self.sc.test_path(self.path_test_logs)
 
         # display main menu
-        self.run()
+        self.sc.start()
     
     def run(self):
         self.sc.print("Processing...")
@@ -495,5 +498,7 @@ class main:
         self.sc.print("")
         self.sc.good("Done!")
         self.sc.exit()
+        # restart
+        self.sc.restart()
 
 main()
