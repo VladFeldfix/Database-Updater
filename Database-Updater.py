@@ -72,8 +72,8 @@ class main:
                             txt_file = True
                         if file == PartNumber+".html":
                             html_file = True
-                        input(file)
-                        input(".mpt_product" in file)
+                        #input(file)
+                        #input(".mpt_product" in file)
                         if ".mpt_product" in file and PartNumber in file:
                             mpt_file = True
                         if file == "testcables_to_product.csv":
