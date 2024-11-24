@@ -6,7 +6,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "2.0")
+        self.sc = SmartConsole("Database Updater", "2.1")
 
         # set-up main memu
         self.sc.add_main_menu_item("RUN", self.run)
@@ -497,7 +497,7 @@ class main:
         workbook.close()
         self.sc.print("")
         self.sc.good("Done!")
-        self.sc.exit()
+        
         # restart
         self.sc.restart()
 
