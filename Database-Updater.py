@@ -6,7 +6,7 @@ class main:
     # constructor
     def __init__(self):
         # load smart console
-        self.sc = SmartConsole("Database Updater", "2.1")
+        self.sc = SmartConsole("Database Updater", "2.2")
 
         # set-up main memu
         self.sc.add_main_menu_item("RUN", self.run)
@@ -46,6 +46,7 @@ class main:
 
         # GATHER DATA on Programs
         self.sc.print("Gathering data on programs...")
+        UsedBraids = []
         PartNumber = ""
         Status = ""
         Status2 = ""
@@ -85,12 +86,13 @@ class main:
                                         MissingConnectors.append((PartNumber, line[1], line[2], line[0]))
                                         if line[0] == "":
                                             Missing_plugs = True
+                                        UsedBraids.append(line[0])
                     if csv_file and txt_file and html_file and not Missing_plugs:
                         Status = "Complete"
                     if mpt_file and html_file and not Missing_plugs:
                         Status2 = "Complete"
                     Programs.append((PartNumber, Status, Status2))
-
+        
         # GATHER DATA on Braids
         self.sc.print("Gathering data on braids...")
         TestCable = ""
@@ -157,7 +159,7 @@ class main:
                             FlexPN = data[1]
                             Type = data[2]
                             Size = data[3]
-                            Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type))
+                            Braids.append((TestCable, Braid, CustomerPN, FlexPN, Size, Type, str(UsedBraids.count(str(TestCable)+"_"+str(Braid)))))
         Braids = sorted(Braids)
         EmptySpacesSortedList = []
         for key, val in EmptySpaces.items():
@@ -234,26 +236,28 @@ class main:
         # Braids
         sheet_Braids = workbook.add_worksheet("Braids")
         sheet_Braids.freeze_panes(1,0)
-        sheet_Braids.autofilter("A1:F1")
+        sheet_Braids.autofilter("A1:G1")
         sheet_Braids.set_column('A:A', 15)
         sheet_Braids.set_column('B:B', 10)
         sheet_Braids.set_column('C:C', 40)
         sheet_Braids.set_column('D:D', 40)
         sheet_Braids.set_column('E:E', 10)
         sheet_Braids.set_column('F:F', 10)
+        sheet_Braids.set_column('G:G', 10)
         sheet_Braids.write_string("A1", "TEST CABLE", format_black)	
         sheet_Braids.write_string("B1", "BRAID", format_black)
         sheet_Braids.write_string("C1", "CUSTOMER PART NUMBER", format_black)
         sheet_Braids.write_string("D1", "FLEX PART NUMBER", format_black)
         sheet_Braids.write_string("E1", "SIZE", format_black)
         sheet_Braids.write_string("F1", "TYPE", format_black)
+        sheet_Braids.write_string("G1", "USED", format_black)
 
         # Empty Spaces
         sheet_BraidsEmptySpaces = workbook.add_worksheet("Empty Spaces")
         sheet_BraidsEmptySpaces.freeze_panes(1,0)
         sheet_BraidsEmptySpaces.autofilter("A1:B1")
         sheet_BraidsEmptySpaces.set_column('A:A', 15)
-        sheet_BraidsEmptySpaces.set_column('B:B', 15)
+        sheet_BraidsEmptySpaces.set_column('B:B', 20)
         sheet_BraidsEmptySpaces.write_string("A1", "TEST CABLE", format_black)	
         sheet_BraidsEmptySpaces.write_string("B1", "EMPTY SPACES", format_black)
 
@@ -267,7 +271,7 @@ class main:
         sheet_Jigs.write_string("B1", "TEST CABLE", format_black)
 
         # TMSInventory
-        sheet_TMSInventory = workbook.add_worksheet("Labeling-Inventory")
+        sheet_TMSInventory = workbook.add_worksheet("Labeling Inventory")
         sheet_TMSInventory.freeze_panes(1,0)
         sheet_TMSInventory.autofilter("A1:D1")
         sheet_TMSInventory.set_column('A:A', 20)
@@ -337,6 +341,7 @@ class main:
             sheet_Braids.write_string("D"+str(i), line[3], Color)
             sheet_Braids.write_string("E"+str(i), str(line[4]), Color)
             sheet_Braids.write_string("F"+str(i), line[5], Color)
+            sheet_Braids.write_string("G"+str(i), line[6], Color)
         
         # Empty Spaces
         i = 1
