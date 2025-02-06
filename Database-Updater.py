@@ -50,6 +50,9 @@ class main:
         
         self.sc.print("Gathering data on test logs...")
         self.data_testlogs = Test_Logs.get_data(self.path_test_results)
+
+        self.sc.print("Generating Lua files...")
+        TestingCables.makelua(self.path_test_cables)
         
         self.generate_excel_table()
     
