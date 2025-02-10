@@ -1,5 +1,5 @@
 ('C:\\Users\\migvlfel\\OneDrive - '
- 'Flex\\Desktop\\Apps\\Database-Updater\\%currentDirectory%\\Database-Updater.exe',
+ 'Flex\\Desktop\\Apps\\Database-Updater\\dist\\Database-Updater.exe',
  True,
  False,
  False,
@@ -105,7 +105,7 @@
  [],
  False,
  False,
- 1738829754,
+ 1739193209,
  [('run.exe',
    'C:\\Users\\migvlfel\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],

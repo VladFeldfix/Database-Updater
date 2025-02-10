@@ -111,13 +111,13 @@ class Generate_Excel:
                 self.sheet_Programs.write_string("C"+str(i), line[2], self.format_green)
 
             # D MPT5000L
-            if line[1] == "In Progress":
+            if line[3] == "In Progress":
                 self.sheet_Programs.write_string("D"+str(i), line[3], self.format_red)
             else:
                 self.sheet_Programs.write_string("D"+str(i), line[3], self.format_green)
             
             # E MPT5000L Validation
-            if line[2] == "N":
+            if line[4] == "N":
                 self.sheet_Programs.write_string("E"+str(i), line[4], self.format_red)
             else:
                 self.sheet_Programs.write_string("E"+str(i), line[4], self.format_green)
